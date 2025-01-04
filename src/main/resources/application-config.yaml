@@ -1,0 +1,23 @@
+spring:
+  application:
+    name: instancio-petclinic-jpa-example
+  sql:
+    init:
+      schema-locations: ""
+      data-locations: ""
+
+  jpa:
+    generate-ddl: true
+    database: default
+    properties:
+      hibernate:
+        enable_lazy_load_no_trans: true
+        generate-ddl: true
+        ddl-auto: update
+
+
+instancio:
+  sample:
+    data:
+      config:
+        dataSize: 100
