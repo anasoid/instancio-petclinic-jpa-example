@@ -32,7 +32,11 @@ import static org.instancio.Select.field;
     protected InstancioApi<T> initInstancioApi() {
         InstancioApi<T> result = super.initInstancioApi();
         result.ignore(field(T::getId));
-
         return result;
+    }
+
+    @Override
+    protected String getIdFieldName() {
+        return "id";
     }
 }

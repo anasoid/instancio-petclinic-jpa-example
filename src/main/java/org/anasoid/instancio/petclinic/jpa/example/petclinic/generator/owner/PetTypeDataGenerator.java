@@ -1,6 +1,7 @@
 package org.anasoid.instancio.petclinic.jpa.example.petclinic.generator.owner;
 
-import org.anasoid.instancio.petclinic.jpa.example.petclinic.generator.AbstractEntityDataGenerator;
+import org.anasoid.instancio.petclinic.jpa.example.core.GeneratorConfig;
+import org.anasoid.instancio.petclinic.jpa.example.petclinic.generator.model.NamedEntityDataGenerator;
 import org.instancio.InstancioApi;
 import org.instancio.Model;
 import org.springframework.samples.petclinic.owner.PetType;
@@ -25,7 +26,7 @@ import org.springframework.stereotype.Component;
  *
  */
 @Component
-public class PetTypeDataGenerator extends AbstractEntityDataGenerator<PetType> {
+public class PetTypeDataGenerator extends NamedEntityDataGenerator<PetType> {
     @Override
     protected Model<PetType> getEntityModel(InstancioApi<PetType> instancioApi) {
         return instancioApi.toModel();
@@ -37,22 +38,9 @@ public class PetTypeDataGenerator extends AbstractEntityDataGenerator<PetType> {
     }
 
     @Override
-    protected int minElement() {
-        return 10;
+    protected GeneratorConfig getGeneratorConfig() {
+        return new GeneratorConfig(5, 10, 100, false);
     }
 
-    @Override
-    protected int maxElement() {
-        return 10;
-    }
 
-    @Override
-    protected int percentElement() {
-        return 100;
-    }
-
-    @Override
-    protected boolean forceGenerateElement() {
-        return false;
-    }
 }

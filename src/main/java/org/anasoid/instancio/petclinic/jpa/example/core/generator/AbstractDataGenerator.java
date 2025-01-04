@@ -1,10 +1,10 @@
 package org.anasoid.instancio.petclinic.jpa.example.core.generator;
 
 
-import jakarta.persistence.NoResultException;
 import jakarta.transaction.Transactional;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import org.anasoid.instancio.petclinic.jpa.example.core.GeneratorConfig;
 import org.anasoid.instancio.petclinic.jpa.example.core.dao.EntityDao;
 import org.anasoid.instancio.petclinic.jpa.example.core.properties.SampleDataProperties;
 import org.instancio.Instancio;
@@ -18,9 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.net.URL;
 import java.nio.file.Path;
 import java.text.MessageFormat;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 import java.util.stream.IntStream;
 
 import static org.instancio.Select.all;
@@ -38,18 +36,18 @@ public abstract class AbstractDataGenerator<T, ID> implements DataGenerator {
 
     @Override
     public String getName() {
-        return this.getClass().getSimpleName().replace("EntityDataGenerator", " EntityDataGenerator");
+        return this.getClass().getSimpleName().replace("EntityDataGenerator", " DataGenerator");
     }
 
     @Override
     public void generate() {
         long element =
                 Math.max(
-                        minElement(),
-                        Math.min(maxElement(), properties.getDataSize() * percentElement() / 100));
+                        getGeneratorConfig().getMinElement(),
+                        Math.min(getGeneratorConfig().getMaxElement(), properties.getDataSize() * getGeneratorConfig().getMinElement() / 100));
         log.info(">>>> Start generate {} of {}", element, getEntityClass().getSimpleName());
         long finalElement = element;
-        if (!forceGenerateElement()) {
+        if (!getGeneratorConfig().isForceGenerateElement()) {
             long existCount = getCountFromDatabase();
             finalElement = existCount > element ? 0 : Math.min(element, element - existCount);
         }
@@ -59,18 +57,36 @@ public abstract class AbstractDataGenerator<T, ID> implements DataGenerator {
         log.info(">>>> End generate {} of {}", finalElement, getEntityClass().getSimpleName());
     }
 
-    public void generateElement() {
+    @Override
+    public List<T> generate(int min, int max) {
+        Random random = new Random();
+        int element = random.nextInt(max - min + 1) + min;
+        log.info(">>>> Start generate  [{},{}] of {}", min, max, getEntityClass().getSimpleName());
+        log.info(">>>> Start generate {} of {}", element, getEntityClass().getSimpleName());
+        List<T> result = new ArrayList<>(element);
+        for (int i = 0; i < element; i++) {
+            result.add(generateElement());
+        }
+        log.info(">>>> End generate {} of {}", element, getEntityClass().getSimpleName());
+        return result;
+    }
+
+    public T generateElement() {
         T entity = Instancio.of(getEntityModel(initInstancioApi())).create();
 
-        T old = getEntityById(getId(entity));
+        T old = getEntityByFunctionalId(entity);
         if (old == null) {
             entityDao.persist(entity);
+            return entity;
         } else {
             log.info(
-                    ">>>>>> skip persist {} with id {}",
+                    ">>>>>> skip persist {} with {} {}",
                     getEntityClass().getSimpleName(),
+                    getIdFieldName(),
                     getId(entity));
+            return old;
         }
+
     }
 
     protected InstancioApi<T> initInstancioApi() {
@@ -117,24 +133,18 @@ public abstract class AbstractDataGenerator<T, ID> implements DataGenerator {
         return getRandomFromDatabase(clazz, getQueryDefault(), min, max);
     }
 
-    protected T getEntityById(ID id) {
-        String finalQuery =
-                MessageFormat.format(
-                        "select e from {0} e where id= ?1", getEntityClass().getSimpleName());
-        try {
-            return (T) entityDao.createQuery(finalQuery).setParameter(1, id).getSingleResult();
-        } catch (NoResultException ex) {
-            return null;
-        }
+    protected T getEntityByFunctionalId(T entity) {
+
+        return entityDao.getEntityByQuery(getEntityClass(), getFunctionalIdQuery(), getFunctionalIdParams(entity));
+
     }
+    protected abstract Map<String, Object> getFunctionalIdParams(T entity);
+    protected abstract String   getFunctionalIdQuery();
 
 
     protected long getCountFromDatabase() {
-        String finalQuery =
-                MessageFormat.format("select count(*) from {0}", getEntityClass().getSimpleName());
-        List<Long> resultsDatabase = entityDao.createQuery(finalQuery).getResultList();
 
-        return resultsDatabase.get(0);
+        return entityDao.getCountFromDatabase(getEntityClass());
     }
 
     protected <F extends T> List<F> getRandomFromDatabase(
@@ -157,20 +167,18 @@ public abstract class AbstractDataGenerator<T, ID> implements DataGenerator {
     }
 
     protected String getQueryDefault() {
-        return "select id from {0}";
+        return "select " + getIdFieldName() + " from {0} ";
+
     }
 
     protected abstract Model<T> getEntityModel(InstancioApi<T> instancioApi);
 
     protected abstract Class<T> getEntityClass();
 
-    protected abstract int minElement();
+    protected abstract GeneratorConfig getGeneratorConfig();
 
-    protected abstract int maxElement();
-
-    protected abstract int percentElement();
-
-    protected abstract boolean forceGenerateElement();
 
     protected abstract ID getId(T entity);
+
+    protected abstract String getIdFieldName();
 }

@@ -10,7 +10,7 @@ import org.springframework.context.annotation.Configuration;
 import java.util.List;
 
 @Configuration
-public class SampleDataConfig {
+public class SampleDataSpringConfig {
 
     @Bean
     org.anasoid.instancio.petclinic.jpa.example.core.generator.GroupedDataGenerator mainDataGenerator(
