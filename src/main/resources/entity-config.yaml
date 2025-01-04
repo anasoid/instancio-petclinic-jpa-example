@@ -1,0 +1,11 @@
+instancio:
+  sample:
+    data:
+      config:
+        dataSize: 100
+        entities:
+          pettype:
+            minElement: 5
+            maxElement: 5
+            percentElement: 100
+            forceGenerateElement: false

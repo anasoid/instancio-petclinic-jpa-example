@@ -1,6 +1,8 @@
 spring:
   application:
     name: instancio-petclinic-jpa-example
+  config:
+    import: classpath:/entity-config.yaml
   sql:
     init:
       schema-locations: ""
@@ -16,8 +18,3 @@ spring:
         ddl-auto: update
 
 
-instancio:
-  sample:
-    data:
-      config:
-        dataSize: 100

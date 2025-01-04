@@ -27,6 +27,7 @@ public class InstancioPetclinicJpaExampleApplication implements CommandLineRunne
             log.info("APPLICATION FINISHED");
         } catch (Exception ex) {
             ex.printStackTrace();
+            throw ex;
         }
     }
 

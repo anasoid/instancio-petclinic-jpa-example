@@ -4,7 +4,6 @@ package org.anasoid.instancio.petclinic.jpa.example.core.generator;
 import jakarta.transaction.Transactional;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import org.anasoid.instancio.petclinic.jpa.example.core.GeneratorConfig;
 import org.anasoid.instancio.petclinic.jpa.example.core.dao.EntityDao;
 import org.anasoid.instancio.petclinic.jpa.example.core.properties.SampleDataProperties;
 import org.instancio.Instancio;
@@ -18,7 +17,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.net.URL;
 import java.nio.file.Path;
 import java.text.MessageFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Random;
 import java.util.stream.IntStream;
 
 import static org.instancio.Select.all;
@@ -47,7 +49,7 @@ public abstract class AbstractDataGenerator<T, ID> implements DataGenerator {
                         Math.min(getGeneratorConfig().getMaxElement(), properties.getDataSize() * getGeneratorConfig().getMinElement() / 100));
         log.info(">>>> Start generate {} of {}", element, getEntityClass().getSimpleName());
         long finalElement = element;
-        if (!getGeneratorConfig().isForceGenerateElement()) {
+        if (!getGeneratorConfig().getForceGenerateElement()) {
             long existCount = getCountFromDatabase();
             finalElement = existCount > element ? 0 : Math.min(element, element - existCount);
         }
@@ -138,8 +140,10 @@ public abstract class AbstractDataGenerator<T, ID> implements DataGenerator {
         return entityDao.getEntityByQuery(getEntityClass(), getFunctionalIdQuery(), getFunctionalIdParams(entity));
 
     }
+
     protected abstract Map<String, Object> getFunctionalIdParams(T entity);
-    protected abstract String   getFunctionalIdQuery();
+
+    protected abstract String getFunctionalIdQuery();
 
 
     protected long getCountFromDatabase() {
@@ -175,7 +179,10 @@ public abstract class AbstractDataGenerator<T, ID> implements DataGenerator {
 
     protected abstract Class<T> getEntityClass();
 
-    protected abstract GeneratorConfig getGeneratorConfig();
+
+    protected SampleDataProperties.GeneratorProperties getGeneratorConfig() {
+        return getProperties().getEntities().get(getEntityClass().getSimpleName().toLowerCase());
+    }
 
 
     protected abstract ID getId(T entity);
