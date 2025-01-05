@@ -10,10 +10,9 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
 
-@SpringBootApplication(scanBasePackages = {"org.anasoid.instancio.petclinic.jpa.example"})
+@SpringBootApplication(scanBasePackages = {"org.anasoid.instancio.petclinic.jpa.example", "org.springframework.samples"})
 @Slf4j
-@EntityScan("org.springframework.samples.petclinic")
-public class InstancioPetclinicJpaExampleApplication implements CommandLineRunner {
+public class PetClinicWithDataApplication implements CommandLineRunner {
 
     @Autowired()
     @Qualifier("mainDataGenerator")
@@ -21,10 +20,10 @@ public class InstancioPetclinicJpaExampleApplication implements CommandLineRunne
 
     public static void main(String[] args) {
         try {
-            log.info("STARTING THE APPLICATION");
+            log.info("STARTING load Data");
             System.setProperty("spring.config.name", "application-config");
-            SpringApplication.run(InstancioPetclinicJpaExampleApplication.class, args);
-            log.info("APPLICATION FINISHED");
+            SpringApplication.run(PetClinicWithDataApplication.class, args);
+            log.info("End load Data");
         } catch (Exception ex) {
             ex.printStackTrace();
             throw ex;

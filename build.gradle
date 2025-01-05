@@ -29,17 +29,7 @@ dependencies {
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 
-    implementation('org.springframework.samples:spring-petclinic:3.4.0-SNAPSHOT') {
-
-        exclude group: 'org.springframework.boot' //by group
-        exclude group: 'org.webjars'
-        exclude group: 'org.webjars.npm'
-        exclude group: 'com.github.ben-manes'
-        exclude group: 'javax.cache'
-        exclude group: 'io.projectreactor'
-        exclude group: 'jakarta.xml.bind'
-
-    }
+    implementation('org.springframework.samples:spring-petclinic:3.4.0-SNAPSHOT')
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     implementation 'com.github.gavlyukovskiy:p6spy-spring-boot-starter:1.10.0'
     runtimeOnly 'com.h2database:h2'
