@@ -107,11 +107,11 @@ public abstract class AbstractDataGenerator<T, ID> implements DataGenerator {
         }
     }
 
-    public FeedProvider getFeedProvider() {
+    protected FeedProvider getFeedProvider() {
         String resourcePath = "/data/" + getEntityClass().getSimpleName() + ".csv";
         URL csv = this.getClass().getResource(resourcePath);
         if (csv != null) {
-            return feed -> feed.ofFile(Path.of(csv.getFile())).dataAccess(FeedDataAccess.SEQUENTIAL);
+            return feed -> feed.ofFile(Path.of(csv.getFile())).dataAccess(FeedDataAccess.RANDOM);
 
         } else {
             log.info("Skip csv feed ressource '{}' not found", resourcePath);
@@ -123,17 +123,17 @@ public abstract class AbstractDataGenerator<T, ID> implements DataGenerator {
         return Settings.create().set(Keys.MAX_DEPTH, 2);
     }
 
-    protected T getRandomFromDatabase() {
+    public T getRandomFromDatabase() {
         List<T> result = getRandomFromDatabase(1, 1);
         return result.isEmpty() ? null : result.get(0);
     }
 
-    protected List<T> getRandomFromDatabase(int max) {
+    public List<T> getRandomFromDatabase(int max) {
 
         return getRandomFromDatabase(1, max);
     }
 
-    protected List<T> getRandomFromDatabase(int min, int max) {
+    public List<T> getRandomFromDatabase(int min, int max) {
 
         return getRandomFromDatabase(getEntityClass(), min, max);
     }
