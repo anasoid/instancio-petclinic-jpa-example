@@ -16,10 +16,11 @@ public class EntityDao<T, ID> {
     @Getter
     private EntityManager entityManager;
 
-    @Transactional(Transactional.TxType.REQUIRES_NEW)
+    @Transactional(Transactional.TxType.REQUIRED)
     public <F extends T> void persist(F entity) {
         entityManager.persist(entity);
     }
+
 
     public Query createQuery(String query) {
         return entityManager.createQuery(query);

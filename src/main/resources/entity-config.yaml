@@ -3,9 +3,25 @@ instancio:
     data:
       config:
         dataSize: 100
+        csv-path: /data
         entities:
           pettype:
             minElement: 5
             maxElement: 5
+            percentElement: 100
+            forceGenerateElement: false
+          specialty:
+            minElement: 5
+            maxElement: 5
+            percentElement: 100
+            forceGenerateElement: false
+          vet:
+            minElement: 10
+            maxElement: 10
+            percentElement: 100
+            forceGenerateElement: false
+          owner:
+            minElement: 100
+            maxElement: 99999
             percentElement: 100
             forceGenerateElement: false

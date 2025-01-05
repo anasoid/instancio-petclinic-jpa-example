@@ -56,8 +56,16 @@ public abstract class AbstractDataGenerator<T, ID> implements DataGenerator {
             finalElement = existCount > element ? 0 : Math.min(element, element - existCount);
         }
         //force generate Elemnt by count
-        long count = generateElementStream(finalElement).count();
-        log.info(">>>> End generate {} of {}", count, getEntityClass().getSimpleName());
+        for (int i = 0; i < finalElement; i++) {
+            transactionalGenerate();
+        }
+
+        log.info(">>>> End generate {} of {}", finalElement, getEntityClass().getSimpleName());
+    }
+
+    @Transactional(Transactional.TxType.REQUIRED)
+    void transactionalGenerate() {
+        generateElementStream(1).count();
     }
 
     @Override
@@ -68,6 +76,7 @@ public abstract class AbstractDataGenerator<T, ID> implements DataGenerator {
         log.info(">>>> Start generate {} of {}", element, getEntityClass().getSimpleName());
         List<T> result = generateElementStream(element).toList();
         log.info(">>>> End generate {} of {}", element, getEntityClass().getSimpleName());
+
         return result;
     }
 
@@ -108,7 +117,7 @@ public abstract class AbstractDataGenerator<T, ID> implements DataGenerator {
     }
 
     protected FeedProvider getFeedProvider() {
-        String resourcePath = "/data/" + getEntityClass().getSimpleName() + ".csv";
+        String resourcePath = properties.getCsvPath() + "/" + getEntityClass().getSimpleName().toLowerCase() + ".csv";
         URL csv = this.getClass().getResource(resourcePath);
         if (csv != null) {
             return feed -> feed.ofFile(Path.of(csv.getFile())).dataAccess(FeedDataAccess.RANDOM);
@@ -145,6 +154,9 @@ public abstract class AbstractDataGenerator<T, ID> implements DataGenerator {
 
     protected T getEntityByFunctionalId(T entity) {
 
+        if (getFunctionalIdQuery() == null) {
+            return null;
+        }
         return entityDao.getEntityByQuery(getEntityClass(), getFunctionalIdQuery(), getFunctionalIdParams(entity));
 
     }
@@ -172,6 +184,7 @@ public abstract class AbstractDataGenerator<T, ID> implements DataGenerator {
                         n -> {
                             Random random2 = new Random();
                             int randomIndex = random2.nextInt(max - min + 1) + min;
+                            randomIndex = Math.min(randomIndex, resultsDatabase.size() - 1);
                             results.add(resultsDatabase.get(randomIndex));
                         });
 

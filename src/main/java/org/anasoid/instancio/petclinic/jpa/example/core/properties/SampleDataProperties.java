@@ -14,6 +14,7 @@ import java.util.Map;
 public class SampleDataProperties {
 
     private Integer dataSize;
+    private String csvPath;
 
     Map<String, GeneratorProperties> entities;
 
