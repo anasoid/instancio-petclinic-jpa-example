@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 import static org.instancio.Select.all;
 
@@ -54,10 +55,9 @@ public abstract class AbstractDataGenerator<T, ID> implements DataGenerator {
             long existCount = getCountFromDatabase();
             finalElement = existCount > element ? 0 : Math.min(element, element - existCount);
         }
-        for (int i = 0; i < finalElement; i++) {
-            generateElement();
-        }
-        log.info(">>>> End generate {} of {}", finalElement, getEntityClass().getSimpleName());
+        //force generate Elemnt by count
+        long count = generateElementStream(finalElement).count();
+        log.info(">>>> End generate {} of {}", count, getEntityClass().getSimpleName());
     }
 
     @Override
@@ -66,30 +66,30 @@ public abstract class AbstractDataGenerator<T, ID> implements DataGenerator {
         int element = random.nextInt(max - min + 1) + min;
         log.info(">>>> Start generate  [{},{}] of {}", min, max, getEntityClass().getSimpleName());
         log.info(">>>> Start generate {} of {}", element, getEntityClass().getSimpleName());
-        List<T> result = new ArrayList<>(element);
-        for (int i = 0; i < element; i++) {
-            result.add(generateElement());
-        }
+        List<T> result = generateElementStream(element).toList();
         log.info(">>>> End generate {} of {}", element, getEntityClass().getSimpleName());
         return result;
     }
 
-    public T generateElement() {
-        T entity = Instancio.of(getEntityModel(initInstancioApi())).create();
+    private Stream<T> generateElementStream(long maxSize) {
+        return Instancio.stream(getEntityModel(initInstancioApi()))
 
-        T old = getEntityByFunctionalId(entity);
-        if (old == null) {
-            entityDao.persist(entity);
-            return entity;
-        } else {
-            log.info(
-                    ">>>>>> skip persist {} with {}",
-                    getEntityClass().getSimpleName(),
-                    getFunctionalIdParams(old));
-            return old;
-        }
-
+                .limit(maxSize)
+                .map(entity -> {
+                    T old = getEntityByFunctionalId(entity);
+                    if (old == null) {
+                        entityDao.persist(entity);
+                        return entity;
+                    } else {
+                        log.info(
+                                ">>>>>> skip persist {} with {}",
+                                getEntityClass().getSimpleName(),
+                                getFunctionalIdParams(old));
+                        return old;
+                    }
+                });
     }
+
 
     protected InstancioApi<T> initInstancioApi() {
         InstancioApi<T> instancio =
@@ -111,7 +111,7 @@ public abstract class AbstractDataGenerator<T, ID> implements DataGenerator {
         String resourcePath = "/data/" + getEntityClass().getSimpleName() + ".csv";
         URL csv = this.getClass().getResource(resourcePath);
         if (csv != null) {
-            return feed -> feed.ofFile(Path.of(csv.getFile())).dataAccess(FeedDataAccess.RANDOM);
+            return feed -> feed.ofFile(Path.of(csv.getFile())).dataAccess(FeedDataAccess.SEQUENTIAL);
 
         } else {
             log.info("Skip csv feed ressource '{}' not found", resourcePath);

@@ -8,9 +8,10 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.autoconfigure.domain.EntityScan;
 
-@SpringBootApplication(scanBasePackages = {"org.anasoid.instancio.petclinic.jpa.example", "org.springframework.samples"})
+@SpringBootApplication(scanBasePackages = {"org.anasoid.instancio.petclinic.jpa.example.config",
+        "org.anasoid.instancio.petclinic.jpa.example.core",
+        "org.anasoid.instancio.petclinic.jpa.example.petclinic", "org.springframework.samples"})
 @Slf4j
 public class PetClinicWithDataApplication implements CommandLineRunner {
 

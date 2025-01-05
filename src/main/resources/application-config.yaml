@@ -1,6 +1,8 @@
 spring:
   application:
     name: instancio-petclinic-jpa-example
+  datasource:
+    url: jdbc:h2:mem:AZ;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
   config:
     import: classpath:/entity-config.yaml
   sql:
