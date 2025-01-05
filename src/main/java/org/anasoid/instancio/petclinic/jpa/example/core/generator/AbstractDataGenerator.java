@@ -1,28 +1,25 @@
 package org.anasoid.instancio.petclinic.jpa.example.core.generator;
 
 
+import jakarta.annotation.PostConstruct;
 import jakarta.transaction.Transactional;
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.anasoid.instancio.petclinic.jpa.example.core.dao.EntityDao;
+import org.anasoid.instancio.petclinic.jpa.example.core.helper.DataGeneratorHelper;
 import org.anasoid.instancio.petclinic.jpa.example.core.properties.SampleDataProperties;
 import org.instancio.Instancio;
 import org.instancio.InstancioApi;
 import org.instancio.Model;
 import org.instancio.feed.FeedProvider;
-import org.instancio.settings.FeedDataAccess;
 import org.instancio.settings.Keys;
 import org.instancio.settings.Settings;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.net.URL;
-import java.nio.file.Path;
-import java.text.MessageFormat;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
-import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static org.instancio.Select.all;
@@ -37,6 +34,14 @@ public abstract class AbstractDataGenerator<T, ID> implements DataGenerator {
     @Autowired
     @Getter
     private SampleDataProperties properties;
+    @Getter(AccessLevel.PROTECTED)
+    private DataGeneratorHelper<T, ID> dataGeneratorHelper;
+
+
+    @PostConstruct
+    public void populateMovieCache() {
+        this.dataGeneratorHelper = new DataGeneratorHelper<>(entityDao, properties, getEntityClass());
+    }
 
     @Override
     public String getName() {
@@ -52,7 +57,7 @@ public abstract class AbstractDataGenerator<T, ID> implements DataGenerator {
         log.info(">>>> Start generate {} of {}", element, getEntityClass().getSimpleName());
         long finalElement = element;
         if (!getGeneratorConfig().getForceGenerateElement()) {
-            long existCount = getCountFromDatabase();
+            long existCount = getDataGeneratorHelper().getCountFromDatabase();
             finalElement = existCount > element ? 0 : Math.min(element, element - existCount);
         }
         //force generate Elemnt by count
@@ -117,15 +122,7 @@ public abstract class AbstractDataGenerator<T, ID> implements DataGenerator {
     }
 
     protected FeedProvider getFeedProvider() {
-        String resourcePath = properties.getCsvPath() + "/" + getEntityClass().getSimpleName().toLowerCase() + ".csv";
-        URL csv = this.getClass().getResource(resourcePath);
-        if (csv != null) {
-            return feed -> feed.ofFile(Path.of(csv.getFile())).dataAccess(FeedDataAccess.RANDOM);
-
-        } else {
-            log.info("Skip csv feed ressource '{}' not found", resourcePath);
-            return null;
-        }
+      return   getDataGeneratorHelper().getFeedProvider();
     }
 
     protected Settings getSettings() {
@@ -133,7 +130,7 @@ public abstract class AbstractDataGenerator<T, ID> implements DataGenerator {
     }
 
     public T getRandomFromDatabase() {
-        List<T> result = getRandomFromDatabase(1, 1);
+        List<T> result = getRandomFromDatabase(1);
         return result.isEmpty() ? null : result.get(0);
     }
 
@@ -166,32 +163,14 @@ public abstract class AbstractDataGenerator<T, ID> implements DataGenerator {
     protected abstract String getFunctionalIdQuery();
 
 
-    protected long getCountFromDatabase() {
-
-        return entityDao.getCountFromDatabase(getEntityClass());
-    }
-
     protected <F extends T> List<F> getRandomFromDatabase(
             Class<F> clazz, String query, int min, int max) {
-        String finalQuery = MessageFormat.format(query, clazz.getSimpleName());
-        List<ID> resultsDatabase = entityDao.createQuery(finalQuery).getResultList();
-        Random random = new Random();
-        int randomSize = random.nextInt(max - min + 1) + min;
-        randomSize = Math.min(randomSize, resultsDatabase.size());
-        List<ID> results = new ArrayList<>();
-        IntStream.range(0, randomSize)
-                .forEach(
-                        n -> {
-                            Random random2 = new Random();
-                            int randomIndex = random2.nextInt(max - min + 1) + min;
-                            randomIndex = Math.min(randomIndex, resultsDatabase.size() - 1);
-                            results.add(resultsDatabase.get(randomIndex));
-                        });
+        return dataGeneratorHelper.getRandomFromDatabase(clazz, query, min, max);
 
-        return results.stream().map(id -> entityDao.find(clazz, id)).toList();
+
     }
 
-    protected String getQueryDefault() {
+    private String getQueryDefault() {
         return "select " + getIdFieldName() + " from {0} ";
 
     }
