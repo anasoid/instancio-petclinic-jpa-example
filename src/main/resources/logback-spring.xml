@@ -25,10 +25,10 @@
     <logger name="org.apache.catalina.util.LifecycleBase" level="WARN"/>
 
 
-    <logger name="org.springframework" level="WARN"/>
+    <logger name="org.springframework" level="INFO"/>
 
-    <logger name="org.hibernate" level="WARN"/>
-    <logger name="com.zaxxer.hikari" level="WARN"/>
+    <logger name="org.hibernate" level="INFO"/>
+    <logger name="com.zaxxer.hikari" level="INFO"/>
 
 
     <logger name="org.hibernate.SQL" level="INFO"/>

@@ -9,6 +9,7 @@ import org.anasoid.instancio.petclinic.jpa.example.core.properties.SampleDataPro
 import org.instancio.Instancio;
 import org.instancio.InstancioApi;
 import org.instancio.Model;
+import org.instancio.feed.FeedProvider;
 import org.instancio.settings.FeedDataAccess;
 import org.instancio.settings.Keys;
 import org.instancio.settings.Settings;
@@ -82,10 +83,9 @@ public abstract class AbstractDataGenerator<T, ID> implements DataGenerator {
             return entity;
         } else {
             log.info(
-                    ">>>>>> skip persist {} with {} {}",
+                    ">>>>>> skip persist {} with {}",
                     getEntityClass().getSimpleName(),
-                    getIdFieldName(),
-                    getId(entity));
+                    getFunctionalIdParams(old));
             return old;
         }
 
@@ -100,14 +100,22 @@ public abstract class AbstractDataGenerator<T, ID> implements DataGenerator {
     }
 
     private void applyFeed(InstancioApi<T> instancio) {
+        FeedProvider feedProvider = getFeedProvider();
+        if (feedProvider != null) {
+            instancio.applyFeed(all(this.getEntityClass()), feedProvider);
+
+        }
+    }
+
+    public FeedProvider getFeedProvider() {
         String resourcePath = "/data/" + getEntityClass().getSimpleName() + ".csv";
         URL csv = this.getClass().getResource(resourcePath);
         if (csv != null) {
-            instancio.applyFeed(
-                    all(this.getEntityClass()),
-                    feed -> feed.ofFile(Path.of(csv.getFile())).dataAccess(FeedDataAccess.RANDOM));
+            return feed -> feed.ofFile(Path.of(csv.getFile())).dataAccess(FeedDataAccess.RANDOM);
+
         } else {
             log.info("Skip csv feed ressource '{}' not found", resourcePath);
+            return null;
         }
     }
 
