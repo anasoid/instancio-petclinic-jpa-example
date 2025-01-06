@@ -55,8 +55,7 @@ public class DataGeneratorHelper<T, ID> {
                 .forEach(
                         n -> {
                             Random random2 = new Random();
-                            int randomIndex = random2.nextInt(max - min + 1) + min;
-                            randomIndex = Math.min(randomIndex, resultsDatabase.size() - 1);
+                            int randomIndex = random2.nextInt(resultsDatabase.size());
                             results.add(resultsDatabase.get(randomIndex));
                         });
 
