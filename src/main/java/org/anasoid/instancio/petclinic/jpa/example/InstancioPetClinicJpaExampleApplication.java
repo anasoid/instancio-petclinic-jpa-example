@@ -16,7 +16,7 @@ import org.springframework.boot.autoconfigure.domain.EntityScan;
         "org.anasoid.instancio.petclinic.jpa.example.petclinic",})
 @Slf4j
 @EntityScan("org.springframework.samples.petclinic")
-public class InstancioPetclinicJpaExampleApplication implements CommandLineRunner {
+public class InstancioPetClinicJpaExampleApplication implements CommandLineRunner {
 
     @Autowired()
     @Qualifier("mainDataGenerator")
@@ -26,7 +26,7 @@ public class InstancioPetclinicJpaExampleApplication implements CommandLineRunne
         try {
             log.info("STARTING THE APPLICATION");
             System.setProperty("spring.config.name", "application-config");
-            SpringApplication application = new SpringApplication(InstancioPetclinicJpaExampleApplication.class);
+            SpringApplication application = new SpringApplication(InstancioPetClinicJpaExampleApplication.class);
             application.setWebApplicationType(WebApplicationType.NONE);
             application.run(args);
             log.info("APPLICATION FINISHED");

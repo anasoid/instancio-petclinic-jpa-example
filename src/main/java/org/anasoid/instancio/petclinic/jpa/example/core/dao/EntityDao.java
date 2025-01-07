@@ -18,16 +18,16 @@ public class EntityDao<T, ID> {
 
     @Transactional(Transactional.TxType.REQUIRED)
     public <F extends T> void persist(F entity) {
-        entityManager.persist(entity);
+        getEntityManager().persist(entity);
     }
 
 
     public Query createQuery(String query) {
-        return entityManager.createQuery(query);
+        return getEntityManager().createQuery(query);
     }
 
     public <F extends T> F find(Class<F> clazz, ID id) {
-        return entityManager.find(clazz, id);
+        return getEntityManager().find(clazz, id);
     }
 
 

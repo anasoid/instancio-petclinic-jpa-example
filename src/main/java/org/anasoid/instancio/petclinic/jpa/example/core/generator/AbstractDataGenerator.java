@@ -39,7 +39,7 @@ public abstract class AbstractDataGenerator<T, ID> implements DataGenerator {
 
 
     @PostConstruct
-    public void populateMovieCache() {
+    public void postConstruct() {
         this.dataGeneratorHelper = new DataGeneratorHelper<>(entityDao, properties, getEntityClass());
     }
 
@@ -53,7 +53,7 @@ public abstract class AbstractDataGenerator<T, ID> implements DataGenerator {
         long element =
                 Math.max(
                         getGeneratorConfig().getMinElement(),
-                        Math.min(getGeneratorConfig().getMaxElement(), properties.getDataSize() * getGeneratorConfig().getMinElement() / 100));
+                        Math.min(getGeneratorConfig().getMaxElement(), getProperties().getDataSize() * getGeneratorConfig().getMinElement() / 100));
         log.info(">>>> Start generate {} of {}", element, getEntityClass().getSimpleName());
         long finalElement = element;
         if (!getGeneratorConfig().getForceGenerateElement()) {
@@ -92,7 +92,7 @@ public abstract class AbstractDataGenerator<T, ID> implements DataGenerator {
                 .map(entity -> {
                     T old = getEntityByFunctionalId(entity);
                     if (old == null) {
-                        entityDao.persist(entity);
+                        getEntityDao().persist(entity);
                         return entity;
                     } else {
                         log.info(
@@ -122,7 +122,7 @@ public abstract class AbstractDataGenerator<T, ID> implements DataGenerator {
     }
 
     protected FeedProvider getFeedProvider() {
-      return   getDataGeneratorHelper().getFeedProvider();
+        return getDataGeneratorHelper().getFeedProvider();
     }
 
     protected Settings getSettings() {
