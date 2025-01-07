@@ -1,16 +1,14 @@
-
-
 # This workflow will build a Java project with Gradle
 # For more information see: https://help.github.com/actions/language-and-framework-guides/building-and-testing-java-with-gradle
 
-name : Java CI with Gradle
+name: Java CI with Gradle
 
-on : [ push, pull_request ]
+on: [ push, pull_request ]
 
 jobs:
   build:
 
-    runs-on : ubuntu-latest
+    runs-on: ubuntu-latest
 
     steps:
 
@@ -23,31 +21,35 @@ jobs:
           repository: anasoid/spring-petclinic
           path: './petclinic'
 
-      - name : Set up JDK 17
-        uses : actions/setup-java@v4
-        with :
-          java-version : 17
-          distribution : 'temurin'
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: 17
+          distribution: 'temurin'
 
-      - name : Setup Gradle
-        uses : gradle/actions/setup-gradle@v4
-        with :
-          build-scan-publish : true
-          build-scan-terms-of-use-url : "https://gradle.com/terms-of-service"
-          build-scan-terms-of-use-agree : "yes"
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          build-scan-publish: true
+          build-scan-terms-of-use-url: "https://gradle.com/terms-of-service"
+          build-scan-terms-of-use-agree: "yes"
 
 
-      - name : Build Spring pet clinic (Maven)
-        run : ./petclinic/mvnw package
+      - name: Build Spring pet clinic (Maven)
+        run: |
+          cd ./petclinic 
+          ./mvnw package
 
-      - name : Install local Spring pet clinic (Maven)
-        run : ./petclinic/mvnw install:install-file -Dfile=./target/spring-petclinic-3.4.0-SNAPSHOT.jar.original -DgroupId=org.springframework.samples -DartifactId=spring-petclinic -Dversion=3.4.0-SNAPSHOT -Dpackaging=jar
+      - name: Install local Spring pet clinic (Maven)
+        run: |
+          cd ./petclinic
+          ./mvnw install:install-file -Dfile=./target/spring-petclinic-3.4.0-SNAPSHOT.jar.original -DgroupId=org.springframework.samples -DartifactId=spring-petclinic -Dversion=3.4.0-SNAPSHOT -Dpackaging=jar
 
-      - name : Build with Gradle
-        run : ./gradlew build
+      - name: Build with Gradle
+        run: ./gradlew build
 
-      - name : Publish Test Report
-        uses : mikepenz/action-junit-report@v5
-        with :
-          report_paths : '**/build/test-results/test/TEST-*.xml'
-          github_token : ${{ secrets.GITHUB_TOKEN }}
+      - name: Publish Test Report
+        uses: mikepenz/action-junit-report@v5
+        with:
+          report_paths: '**/build/test-results/test/TEST-*.xml'
+          github_token: ${{ secrets.GITHUB_TOKEN }}
