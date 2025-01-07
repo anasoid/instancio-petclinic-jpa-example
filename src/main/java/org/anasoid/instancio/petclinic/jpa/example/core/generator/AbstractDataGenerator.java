@@ -60,18 +60,12 @@ public abstract class AbstractDataGenerator<T, ID> implements DataGenerator {
             long existCount = getDataGeneratorHelper().getCountFromDatabase();
             finalElement = existCount > element ? 0 : Math.min(element, element - existCount);
         }
-        //force generate Elemnt by count
-        for (int i = 0; i < finalElement; i++) {
-            transactionalGenerate();
-        }
+
+        generateElementStream(finalElement).forEach(entity -> loadOrCreate(entity));
 
         log.info(">>>> End generate {} of {}", finalElement, getEntityClass().getSimpleName());
     }
 
-    @Transactional(Transactional.TxType.REQUIRED)
-    void transactionalGenerate() {
-        generateElementStream(1).count();
-    }
 
     @Override
     public List<T> generate(int min, int max) {
@@ -79,7 +73,7 @@ public abstract class AbstractDataGenerator<T, ID> implements DataGenerator {
         int element = random.nextInt(max - min + 1) + min;
         log.info(">>>> Start generate  [{},{}] of {}", min, max, getEntityClass().getSimpleName());
         log.info(">>>> Start generate {} of {}", element, getEntityClass().getSimpleName());
-        List<T> result = generateElementStream(element).toList();
+        List<T> result = generateElementStream(element).map(entity -> loadOrCreate(entity)).toList();
         log.info(">>>> End generate {} of {}", element, getEntityClass().getSimpleName());
 
         return result;
@@ -87,21 +81,22 @@ public abstract class AbstractDataGenerator<T, ID> implements DataGenerator {
 
     private Stream<T> generateElementStream(long maxSize) {
         return Instancio.stream(getEntityModel(initInstancioApi()))
+                .limit(maxSize);
+    }
 
-                .limit(maxSize)
-                .map(entity -> {
-                    T old = getEntityByFunctionalId(entity);
-                    if (old == null) {
-                        getEntityDao().persist(entity);
-                        return entity;
-                    } else {
-                        log.info(
-                                ">>>>>> skip persist {} with {}",
-                                getEntityClass().getSimpleName(),
-                                getFunctionalIdParams(old));
-                        return old;
-                    }
-                });
+    @Transactional(Transactional.TxType.REQUIRED)
+    protected T loadOrCreate(T entity) {
+        T old = getEntityByFunctionalId(entity);
+        if (old == null) {
+            getEntityDao().persist(entity);
+            return entity;
+        } else {
+            log.info(
+                    ">>>>>> skip persist {} with {}",
+                    getEntityClass().getSimpleName(),
+                    getFunctionalIdParams(old));
+            return old;
+        }
     }
 
 
