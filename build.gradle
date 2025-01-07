@@ -18,7 +18,9 @@ repositories {
     mavenCentral()
     mavenLocal()
 }
-
+springBoot {
+    mainClass = 'org.anasoid.instancio.petclinic.jpa.example.PetClinicWithDataApplication'
+}
 dependencies {
 
 
