@@ -41,10 +41,10 @@ git clone https://github.com/anasoid/instancio-petclinic-jpa-example.git
 
 #### Applications
 
-1. There is two spring boot application present in this repos
-    2. InstancioPetClinicJpaExampleApplication: Console application that generate data in database, should be used with
+1. There is two spring boot application present in this repos:
+    1. __InstancioPetClinicJpaExampleApplication:__ Console application that generate data in database, should be used with
        mysql or other server database to be visible.
-    3. PetClinicWithDataApplication: Star the original spring pet clinic and generated data in h2 in memory database.
+    1. __PetClinicWithDataApplication:__ Star the original spring pet clinic and generated data in h2 in memory database.
 
 #### Code
 
@@ -60,7 +60,7 @@ The config file by entity is present in [entity-config.yaml](src/main/resources/
 |:----------|:----------------------------------------------------------------------------------------|
 | Vet       | generate 10 vets, with one or two specialities                                          |  
 | Owner     | generate minimum 100 owners, with one or two pets                                       |  
-| Specialty | generate 5 specialities based on csv file [specialty.csv](resources/data/specialty.csv) |   
+| Specialty | generate 5 specialities based on csv file [specialty.csv](src/main/resources/data/specialty.csv) |   
 | Pet       | generate one or two pets by owners                                                      |  
-| Pettype   | generate 5 pettype based on csv file [pettype.csv](resources/data/pettype.csv)          |    
+| Pettype   | generate 5 pettype based on csv file [pettype.csv](src/main/    resources/data/pettype.csv)          |    
 | Visit     | generate zero to fives visits by pets                                                   |   
