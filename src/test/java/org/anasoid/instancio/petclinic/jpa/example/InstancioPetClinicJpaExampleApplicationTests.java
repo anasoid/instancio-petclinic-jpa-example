@@ -35,7 +35,7 @@ class InstancioPetClinicJpaExampleApplicationTests {
     void contextLoads() {
         List.of(Vet.class, Owner.class, Pet.class, Visit.class, Specialty.class, PetType.class)
                 .forEach(c -> Assertions
-                        .assertTrue(getCountFromDatabase(Vet.class) > 0));
+                        .assertTrue(getCountFromDatabase(c) > 0));
 
     }
 
